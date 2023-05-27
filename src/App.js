@@ -70,6 +70,7 @@ init({
 });
 
 function App() {
+  let contract, signer;
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
   const abi = [
     {
@@ -482,12 +483,23 @@ function App() {
   }
 
   const readContract = async () => {
-    console.log(`Connected to wallet address ${wallet.accounts[0].address} on ${wallet.label}`);
-
-    const contract = new ethers.Contract(contractAddress, abi, ethersProvider);
-
-    console.log("CONTRACT:", contract);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    signer = ethersProvider.getSigner();
+    contract = new ethers.Contract(contractAddress, abi, signer);
+    console.log("CONTRACT", contract);
   };
+
+  const emitNewCertificate = async () => {
+    console.log(contract);
+    const tx = await contract.emitNewCertificate("0x87Ea036731B7Bef166b6bC76943EC64848eB2492", "Astar");
+    await tx.wait();
+  };
+
+  const certificateName = async () => {
+    const name = await contract.certificateName(0);
+    console.log("NAME", name);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -498,6 +510,8 @@ function App() {
         <button disabled={!wallet} onClick={readContract}>
           read staking contract
         </button>
+        <button onClick={() => emitNewCertificate()}>Emit new certificate</button>
+        <button onClick={() => certificateName()}>Read ID 0</button>
         <p>Emit new certificate for: </p>
 
         <p>Add isuer:</p>
