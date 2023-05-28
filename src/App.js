@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React from "react";
+import { useState, React } from "react";
 import { init, useConnectWallet } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 import { ethers } from "ethers";
@@ -71,6 +71,8 @@ init({
 
 function App() {
   let contract, signer;
+  const [nameCertificate, setNameCertificate] = useState("");
+  const [address, setAddress] = useState("");
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
   const abi = [
     {
@@ -490,13 +492,14 @@ function App() {
   };
 
   const emitNewCertificate = async () => {
-    console.log(contract);
-    const tx = await contract.emitNewCertificate("0x87Ea036731B7Bef166b6bC76943EC64848eB2492", "Astar");
+    console.log("CONTRATO", contract);
+    console.log("ADD", address, "CERT", nameCertificate);
+    const tx = await contract.emitNewCertificate(nameCertificate, address);
     await tx.wait();
   };
 
   const certificateName = async () => {
-    const name = await contract.certificateName(0);
+    const name = await contract.certificateName(4);
     console.log("NAME", name);
   };
 
@@ -510,6 +513,8 @@ function App() {
         <button disabled={!wallet} onClick={readContract}>
           read staking contract
         </button>
+        <input value={nameCertificate} onChange={(e) => setNameCertificate(e.target.value)} />
+        <input value={address} onChange={(e) => setAddress(e.target.value)} />
         <button onClick={() => emitNewCertificate()}>Emit new certificate</button>
         <button onClick={() => certificateName()}>Read ID 0</button>
         <p>Emit new certificate for: </p>
